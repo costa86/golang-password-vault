@@ -38,8 +38,8 @@ func getServicePassword(serviceId *string, services []Service) string {
 
 func getServices() []Service {
 	var services = []Service{}
-	services = append(services, Service{"1", "Netflix", "54321"})
-	services = append(services, Service{"2", "Spotify", "456789"})
+	services = append(services, Service{"1", "Netflix", "myNetflixPassword"})
+	services = append(services, Service{"2", "Spotify", "mySpotifyPassword"})
 	return services
 }
 
@@ -55,7 +55,7 @@ func checkMasterPassword() bool {
 
 func main() {
 	print("**Password manager**")
-	service := flag.String("service", "0", "Service ID. Leave it empty to display all")
+	service := flag.String("service", "0", "Service ID. 0 to display all")
 	flag.Parse()
 	message := getServicePassword(service, getServices())
 	print(message)

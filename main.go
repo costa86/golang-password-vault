@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/atotto/clipboard"
 	"golang.org/x/crypto/ssh/terminal"
-	"time"
 	"strconv"
+	"time"
 )
 
 var print = fmt.Println
@@ -24,15 +24,19 @@ func listServices(services []Service) {
 
 }
 
+func setClipboard(service Service, ttl *int) {
+	clipboard.WriteAll(service.Password)
+	print("The password for " + service.Name + " is in your clipboard, but will disapear in " + strconv.Itoa(*ttl) + " seconds!")
+	time.Sleep(time.Duration(*ttl) * time.Second)
+	clipboard.WriteAll("")
+	print("Your clipboard has been erased")
+}
+
 func getServicePassword(serviceId *string, services []Service, ttl *int) bool {
 	for _, i := range services {
 		if *serviceId == i.Id {
 			if checkMasterPassword() {
-				clipboard.WriteAll(i.Password)
-				print("The password for " + i.Name + " is in your clipboard, but will disapear in " + strconv.Itoa(*ttl) + " seconds!")
-				time.Sleep(time.Duration(*ttl) * time.Second)
-				clipboard.WriteAll("")
-				print("Your clipboard has been erased")
+				setClipboard(i, ttl)
 				return true
 			}
 			print("Invalid master password")

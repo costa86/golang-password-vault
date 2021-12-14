@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/atotto/clipboard"
 	"golang.org/x/crypto/ssh/terminal"
+	"time"
+	"strconv"
 )
 
 var print = fmt.Println
@@ -22,31 +24,29 @@ func listServices(services []Service) {
 
 }
 
-func getServicePassword(serviceId *string, services []Service) string {
+func getServicePassword(serviceId *string, services []Service, ttl *int) bool {
 	for _, i := range services {
 		if *serviceId == i.Id {
 			if checkMasterPassword() {
 				clipboard.WriteAll(i.Password)
-				return "The password for " + i.Name + " is in your clipboard"
+				print("The password for " + i.Name + " is in your clipboard, but will disapear in " + strconv.Itoa(*ttl) + " seconds!")
+				time.Sleep(time.Duration(*ttl) * time.Second)
+				clipboard.WriteAll("")
+				print("Your clipboard has been erased")
+				return true
 			}
-			return "Invalid master password"
+			print("Invalid master password")
+			return false
 		}
 	}
+	print(*serviceId + " was not found\n*********")
 	listServices(services)
-	return *serviceId + " was not found\n*********"
-}
-
-func getServices() []Service {
-	var services = []Service{}
-	services = append(services, Service{"1", "Netflix", "myNetflixPassword"})
-	services = append(services, Service{"2", "Spotify", "mySpotifyPassword"})
-	return services
+	return false
 }
 
 func checkMasterPassword() bool {
 	print("Enter master password: ")
 	password, err := terminal.ReadPassword(0)
-	masterPassword := "12345"
 	if err == nil && string(password) == masterPassword {
 		return true
 	}
@@ -55,8 +55,14 @@ func checkMasterPassword() bool {
 
 func main() {
 	print("**Password manager**")
-	service := flag.String("service", "0", "Service ID. 0 to display all")
+	service := flag.String("s", "", "Service ID")
+	ttl := flag.Int("t", 5, "Time in seconds the clipboard with the password will be valid for")
+
 	flag.Parse()
-	message := getServicePassword(service, getServices())
-	print(message)
+	if *service == "" {
+		listServices(getServices())
+	} else {
+		getServicePassword(service, getServices(), ttl)
+	}
+
 }

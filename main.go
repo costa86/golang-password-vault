@@ -49,6 +49,7 @@ func getServicePassword(serviceId *string, services []Service, ttl *int) bool {
 }
 
 func checkMasterPassword() bool {
+	masterPassword := "masterPassword"
 	print("Enter master password: ")
 	password, err := terminal.ReadPassword(0)
 	if err == nil && string(password) == masterPassword {
